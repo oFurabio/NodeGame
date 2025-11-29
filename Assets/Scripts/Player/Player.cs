@@ -1,13 +1,15 @@
+using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class Player : MonoBehaviour {
     private Camera _mainCamera;
     private CharacterController _controller;
+    public static event EventHandler OnPlayerDeath;
 
     [SerializeField] private float speed = 5f;
 
     private void Awake() {
+        Time.timeScale = 1f;
         _controller = GetComponent<CharacterController>();
         _mainCamera = Camera.main;
 
@@ -32,5 +34,19 @@ public class Player : MonoBehaviour {
             desiredMoveDirection.Normalize();
 
         _controller.SimpleMove(desiredMoveDirection * speed);
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        if (other.CompareTag("Zombie")) {
+            
+            Debug.Log("Player hit by Zombie! Sending score to server...");
+            Time.timeScale = 0f;
+            OnPlayerDeath?.Invoke(this, EventArgs.Empty);
+
+            ScoreManager scoreManager = FindFirstObjectByType<ScoreManager>();
+            
+            if (scoreManager != null) 
+                scoreManager.SendScoreToServer();
+        }
     }
 }

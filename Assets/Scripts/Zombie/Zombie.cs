@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class Zombie : MonoBehaviour, IHitable {
     [SerializeField] private float _despawnDelay = 5f;
     private Rigidbody[] _ragdollRigidbodies;
     private Transform target;
+    public static event EventHandler OnZombieKilled;
 
     [Header("Hit Detection")]
     [SerializeField] private BoxCollider hitDetectionCollider; // Novo
@@ -81,6 +83,7 @@ public class Zombie : MonoBehaviour, IHitable {
             closestRb.AddForceAtPosition(10.0f * _ragdollForceMultiplier * forceDirection, hit.point, ForceMode.Impulse);
         }
 
+        OnZombieKilled?.Invoke(this, EventArgs.Empty);
         StartCoroutine(DespawnAfterSeconds(_despawnDelay));
     }
 
